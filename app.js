@@ -1,3 +1,4 @@
+const methodOverride = require('method-override');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const express = require('express');
@@ -14,6 +15,7 @@ mongoose
 app.set('view engine', 'ejs');
 app.use(express.static('public'));
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(methodOverride('_method'));
 // Blog Schema Config
 const blogSchema = new mongoose.Schema({
 	title: String,
@@ -67,7 +69,28 @@ app.get('/blogs/:id', (req, res) => {
 	});
 });
 // END SHOW
-
+// EDIT
+app.get('/blogs/:id/edit', (req, res) => {
+	Blog.findById(req.params.id, function(err, foundBlog) {
+		if (err) {
+			res.redirect('blogs');
+		} else {
+			res.render('edit', { blog: foundBlog });
+		}
+	});
+});
+// END EDIT
+// UPDATE
+app.put('/blogs/:id', (req, res) => {
+	Blog.findByIdAndUpdate(req.params.id, req.body.blog, function(err, updatedBlog) {
+		if (err) {
+			res.redirect('/blogs');
+		} else {
+			res.redirect('/blogs/' + req.params.id);
+		}
+	});
+});
+// END UPDATE
 // PORT
 
 app.listen(3000, () => console.log('listening on http://localhost:3000/')); //
