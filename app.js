@@ -56,6 +56,18 @@ app.post('/blogs', (req, res) => {
 	});
 });
 // END CREATE
+// SHOW
+app.get('/blogs/:id', (req, res) => {
+	Blog.findById(req.params.id, function(err, foundBlog) {
+		if (err) {
+			res.redirect('/blogs');
+		} else {
+			res.render('show', { blog: foundBlog });
+		}
+	});
+});
+// END SHOW
+
 // PORT
 
 app.listen(3000, () => console.log('listening on http://localhost:3000/')); //
