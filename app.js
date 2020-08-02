@@ -1,5 +1,6 @@
 const methodOverride = require('method-override');
 const bodyParser = require('body-parser');
+const expressSanitizer = require('express-sanitizer');
 const mongoose = require('mongoose');
 const express = require('express');
 const app = express();
@@ -16,6 +17,7 @@ app.set('view engine', 'ejs');
 app.use(express.static('public'));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(methodOverride('_method'));
+app.use(expressSanitizer());
 // Blog Schema Config
 const blogSchema = new mongoose.Schema({
 	title: String,
@@ -49,6 +51,7 @@ app.get('/blogs/new', (req, res) => {
 
 // CREATE
 app.post('/blogs', (req, res) => {
+	req.body.blog.body = req.sanitize(req.body.blog.body);
 	Blog.create(req.body.blog, function(err, newBlog) {
 		if (err) {
 			res.render('new');
@@ -82,6 +85,7 @@ app.get('/blogs/:id/edit', (req, res) => {
 // END EDIT
 // UPDATE
 app.put('/blogs/:id', (req, res) => {
+	req.body.blog.body = req.sanitize(req.body.blog.body);
 	Blog.findByIdAndUpdate(req.params.id, req.body.blog, function(err, updatedBlog) {
 		if (err) {
 			res.redirect('/blogs');
@@ -91,6 +95,17 @@ app.put('/blogs/:id', (req, res) => {
 	});
 });
 // END UPDATE
+// DESTORY
+app.delete('/blogs/:id', (req, res) => {
+	Blog.findByIdAndRemove(req.params.id, function(err) {
+		if (err) {
+			res.redirect('/blogs');
+		} else {
+			res.redirect('/blogs');
+		}
+	});
+});
+// END DESTROY
 // PORT
 
 app.listen(3000, () => console.log('listening on http://localhost:3000/')); //
